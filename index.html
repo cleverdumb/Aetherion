@@ -1,0 +1,27 @@
+<html>
+    <head>
+        <title>Aetherion</title>
+    </head>
+    <style>
+        #cvs {
+            padding: 0px;
+            margin: 0px;
+            width: 100%;
+            height: 100%;
+
+        }
+    </style>
+    <body>
+        <canvas id='cvs'></canvas>
+        <script>
+            const cvs = document.getElementById('cvs');
+            const ctx = cvs.getContext('2d');
+
+            cvs.width = window.innerWidth;
+            cvs.height = window.innerHeight;
+
+            ctx.fillStyle = 'black';
+            ctx.fillRect(100, 100, 200, 200);
+        </script>
+    </body>
+</html>
