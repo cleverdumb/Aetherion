@@ -22,6 +22,35 @@
 
             ctx.fillStyle = 'black';
             ctx.fillRect(100, 100, 200, 200);
+
+            const gw = 100;
+            const gh = 100;
+
+            const bw = 80;
+            const bh = 80;
+
+            class Tile {
+                constructor (data) {
+                    for (let x in data) {
+                        this[x] = data[x];
+                    }
+                }
+                draw() {
+
+                }
+            }
+
+            let grid = [];
+            for (let y=0; y<gh; y++) {
+                grid.push([]);
+                for (let x=0; x<gw; x++) {
+                    grid[y].push(new Tile({t: 0}))
+                }
+            }
+
+            grid.forEach(y=>{
+                y.forEach(x=>x.draw())
+            })
         </script>
     </body>
 </html>

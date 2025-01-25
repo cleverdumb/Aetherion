@@ -1,0 +1,1 @@
+let names = ['grass/grass-0','grass/grass-1','grass/grass-2','grass/grass-3','man/man-0','man/man-1','man/man-2','man/man-3']
