@@ -8,11 +8,14 @@
             margin: 0px;
             width: 100%;
             height: 100%;
-
+            position: absolute;
+            left: 0px;
+            top: 0px;
         }
     </style>
     <body>
         <canvas id='cvs'></canvas>
+        <script src='spriteList.js'></script>
         <script>
             const cvs = document.getElementById('cvs');
             const ctx = cvs.getContext('2d');
@@ -20,23 +23,62 @@
             cvs.width = window.innerWidth;
             cvs.height = window.innerHeight;
 
-            ctx.fillStyle = 'black';
-            ctx.fillRect(100, 100, 200, 200);
+            ctx.mozImageSmoothingEnabled    = false;
+            ctx.oImageSmoothingEnabled      = false;
+            ctx.webkitImageSmoothingEnabled = false;
+            ctx.msImageSmoothingEnabled     = false;
+            ctx.imageSmoothingEnabled       = false;
 
             const gw = 100;
             const gh = 100;
 
-            const bw = 80;
-            const bh = 80;
+            const bw = 64;
+            const bh = 64;
+
+            const dirs = [[1, 0], [0, -1], [-1, 0], [0, 1]];
 
             class Tile {
-                constructor (data) {
+                constructor (x, y, data) {
+                    this.x = x;
+                    this.y = y;
                     for (let x in data) {
                         this[x] = data[x];
                     }
                 }
                 draw() {
+                    if (this.t != 'empty') {
+                        // ctx.drawImage(sprites.$grassBase, this.x * bw, this.y * bh, bw, bh);
+                        // ctx.drawImage(sprites.grassSide[this.dir], this.x * bw, this.y * bh, bw, bh);
+                        // ctx.drawImage(sprites.grassCorner[this.dir], this.x * bw, this.y * bh, bw, bh);
+                        drawTile(sprites.$grassBase, this.x, this.y);
+                        dirs.forEach((x, i)=>{
+                            if (getTile(this.x + x[0], this.y + x[1]).t != 'grass') {
+                                drawTile(sprites.grassSide, this.x, this.y, i);
+                            }
+                        })
 
+                        dirs.forEach((x, i)=>{
+                            if (getTile(this.x + dirs[i][0], this.y + dirs[i][1]).t != 'grass' || getTile(this.x + dirs[(i+1)%4][0], this.y + dirs[(i+1)%4][1]).t != 'grass' || getTile(this.x + dirs[(i+1)%4][0] + dirs[i][0], this.y + dirs[(i+1)%4][1] + dirs[i][1]).t != 'grass') {
+                                drawTile(sprites.grassCorner, this.x, this.y, i);
+                            }
+                        })
+                    }
+                }
+            }
+
+            function getTile(x, y) {
+                if (x >= 0 && y >= 0 && x < gw && y < gh) {
+                    return grid[y][x];
+                } else {
+                    return new Tile(-1, -1, {t: null});
+                }
+            }
+
+            function drawTile(tile, x, y, dir) {
+                if (dir === 0 || dir) {
+                    ctx.drawImage(tile[dir], x * bw, y * bh, bw, bh);
+                } else {
+                    ctx.drawImage(tile, x * bw, y * bh, bw, bh);
                 }
             }
 
@@ -44,13 +86,56 @@
             for (let y=0; y<gh; y++) {
                 grid.push([]);
                 for (let x=0; x<gw; x++) {
-                    grid[y].push(new Tile({t: 0}))
+                    if (Math.random() < 0.5) {
+                        grid[y].push(new Tile(x, y, {t: 'grass'}))
+                    } else {
+                        grid[y].push(new Tile(x, y, {t: 'empty'}))
+                    }
                 }
             }
 
-            grid.forEach(y=>{
-                y.forEach(x=>x.draw())
-            })
+            let sprites = {};
+
+            function loadAll() {
+                let loadCount = 0;
+                names.forEach(x=>{
+                    if (x[0] == '$') {
+                        sprites[x.split('.png')[0]] = null;
+                    }
+                    else {
+                        if (!sprites.hasOwnProperty(x.split('/')[0])) {
+                            sprites[x.split('/')[0]] = [null, null, null, null];
+                        }
+                    }
+                })
+                names.forEach(x=>{
+                    let i = new Image();
+                    i.src = `sprites/${x}.png`;
+
+                    i.onload = ()=>{
+                        createImageBitmap(i).then(m => {
+                            if (x[0] != '$') {
+                                sprites[x.split('/')[0]][parseInt(x[x.length-1])] = m;
+                            } else {
+                                sprites[x.split('.png')[0]] = m;
+                            }
+                            loadCount++;
+                            if (loadCount >= names.length) {
+                                init();
+                            }
+                        })
+                    }
+                })
+            }
+
+            loadAll();
+
+            function init() {
+                console.log(sprites);
+                grid.forEach(y=>{
+                    y.forEach(x=>x.draw())
+                })
+            }
         </script>
     </body>
 </html>

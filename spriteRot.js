@@ -1,13 +1,13 @@
 const fs = require('fs');
 const {createCanvas, loadImage} = require('canvas')
 
-let names = fs.readdirSync('./sprites').filter(x=>x.endsWith('.png'));
+let names = fs.readdirSync('./sprites').filter(x=>x.endsWith('.png') && x[0] != '$');
 
 names.forEach(x=>{
     if (!fs.existsSync(`sprites/${x.split('.png')[0]}`)) {
         fs.mkdirSync(`sprites/${x.split('.png')[0]}`);
     }
-    console.log(x);
+    // console.log(x);
     loadImage(`sprites/${x}`).then(img => {
         let cvs = createCanvas(32, 32);
         let ctx = cvs.getContext('2d');
@@ -51,9 +51,9 @@ names.forEach(x=>{
         fs.writeFileSync(`sprites/${x.split('.png')[0]}/${x.split('.png')[0] + '-3.png'}`, buffer)
     })
 
-    fs.rmSync(`sprites/${x}`);
+    // fs.rmSync(`sprites/${x}`);
 })
 
 let sprites = fs.readdirSync('./sprites')
 
-fs.writeFileSync('./spriteList.js', `let names = [${sprites.filter(x=>!x.endsWith('.png')).map(x=>[`'${x}/${x}-0'`,`'${x}/${x}-1'`,`'${x}/${x}-2'`,`'${x}/${x}-3'`].join(',')).join(',')}]`)
+fs.writeFileSync('./spriteList.js', `let names = [${sprites.filter(x=>!x.endsWith('.png')).map(x=>[`'${x}/${x}-0'`,`'${x}/${x}-1'`,`'${x}/${x}-2'`,`'${x}/${x}-3'`].join(',')).concat(sprites.filter(x=>x[0] == '$').map(x=>`'${x.split('.png')[0]}'`)).join(',')}]`)
