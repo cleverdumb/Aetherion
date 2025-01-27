@@ -29,11 +29,14 @@
             ctx.msImageSmoothingEnabled     = false;
             ctx.imageSmoothingEnabled       = false;
 
+            const scrW = window.innerWidth;
+            const scrH = window.innerHeight;
+
             const gw = 100;
             const gh = 100;
 
-            const bw = 64;
-            const bh = 64;
+            const bw = 50;
+            const bh = 50;
 
             const dirs = [[1, 0], [0, -1], [-1, 0], [0, 1]];
 
@@ -46,6 +49,9 @@
                     }
                 }
                 draw() {
+                    // if (this.x == 0 && this.y == 0) {
+                    //     console.log(this.t)
+                    // }
                     if (this.t != 'empty') {
                         // ctx.drawImage(sprites.$grassBase, this.x * bw, this.y * bh, bw, bh);
                         // ctx.drawImage(sprites.grassSide[this.dir], this.x * bw, this.y * bh, bw, bh);
@@ -65,6 +71,10 @@
                     }
                 }
             }
+
+            function inGrid(x, y) {
+                return x >= 0 && y >= 0 && x < gw && y < gh;
+            } 
 
             function getTile(x, y) {
                 if (x >= 0 && y >= 0 && x < gw && y < gh) {
@@ -86,11 +96,12 @@
             for (let y=0; y<gh; y++) {
                 grid.push([]);
                 for (let x=0; x<gw; x++) {
-                    if (Math.random() < 0.5) {
-                        grid[y].push(new Tile(x, y, {t: 'grass'}))
-                    } else {
-                        grid[y].push(new Tile(x, y, {t: 'empty'}))
-                    }
+                    // if (Math.random() < 0.5) {
+                    //     grid[y].push(new Tile(x, y, {t: 'grass'}))
+                    // } else {
+                    //     grid[y].push(new Tile(x, y, {t: 'empty'}))
+                    // }
+                    grid[y].push(new Tile(x, y, {t: 'empty'}))
                 }
             }
 
@@ -130,12 +141,31 @@
 
             loadAll();
 
-            function init() {
-                console.log(sprites);
+            function render() {
+                ctx.clearRect(0, 0, scrW, scrH)
                 grid.forEach(y=>{
                     y.forEach(x=>x.draw())
                 })
             }
+
+            function init() {
+                console.log(sprites);
+                render()
+            }
+
+            cvs.addEventListener('mousedown', e=>{
+                let x = Math.floor((e.clientX - cvs.getBoundingClientRect().x)/bw);
+                let y = Math.floor((e.clientY - cvs.getBoundingClientRect().y)/bh);
+
+                if (inGrid(x, y)) {
+                    if (grid[y][x].t == 'grass') { 
+                        grid[y][x].t = 'empty';
+                    } else {
+                        grid[y][x].t = 'grass';
+                    }
+                    render();
+                }
+            })
         </script>
     </body>
 </html>
