@@ -32,8 +32,12 @@
             const scrW = window.innerWidth;
             const scrH = window.innerHeight;
 
-            const gw = 100;
-            const gh = 100;
+            let viewX = 0;
+            let viewY = 0;
+            const viewMoveSpeed = 1;
+
+            const gw = 30;
+            const gh = 30;
 
             const bw = 50;
             const bh = 50;
@@ -53,21 +57,23 @@
                     //     console.log(this.t)
                     // }
                     if (this.t != 'empty') {
-                        // ctx.drawImage(sprites.$grassBase, this.x * bw, this.y * bh, bw, bh);
-                        // ctx.drawImage(sprites.grassSide[this.dir], this.x * bw, this.y * bh, bw, bh);
-                        // ctx.drawImage(sprites.grassCorner[this.dir], this.x * bw, this.y * bh, bw, bh);
-                        drawTile(sprites.$grassBase, this.x, this.y);
-                        dirs.forEach((x, i)=>{
-                            if (getTile(this.x + x[0], this.y + x[1]).t != 'grass') {
-                                drawTile(sprites.grassSide, this.x, this.y, i);
-                            }
-                        })
+                        if (this.t == 'grass') {
+                            // ctx.drawImage(sprites.$grassBase, this.x * bw, this.y * bh, bw, bh);
+                            // ctx.drawImage(sprites.grassSide[this.dir], this.x * bw, this.y * bh, bw, bh);
+                            // ctx.drawImage(sprites.grassCorner[this.dir], this.x * bw, this.y * bh, bw, bh);
+                            drawTile(sprites.man[0], this.x, this.y);
+                            dirs.forEach((x, i)=>{
+                                if (getTile(this.x + x[0], this.y + x[1]).t != 'grass') {
+                                    drawTile(sprites.grassSide, this.x, this.y, i);
+                                }
+                            })
 
-                        dirs.forEach((x, i)=>{
-                            if (getTile(this.x + dirs[i][0], this.y + dirs[i][1]).t != 'grass' || getTile(this.x + dirs[(i+1)%4][0], this.y + dirs[(i+1)%4][1]).t != 'grass' || getTile(this.x + dirs[(i+1)%4][0] + dirs[i][0], this.y + dirs[(i+1)%4][1] + dirs[i][1]).t != 'grass') {
-                                drawTile(sprites.grassCorner, this.x, this.y, i);
-                            }
-                        })
+                            dirs.forEach((x, i)=>{
+                                if (getTile(this.x + dirs[i][0], this.y + dirs[i][1]).t != 'grass' || getTile(this.x + dirs[(i+1)%4][0], this.y + dirs[(i+1)%4][1]).t != 'grass' || getTile(this.x + dirs[(i+1)%4][0] + dirs[i][0], this.y + dirs[(i+1)%4][1] + dirs[i][1]).t != 'grass') {
+                                    drawTile(sprites.grassCorner, this.x, this.y, i);
+                                }
+                            })
+                        }
                     }
                 }
             }
@@ -86,9 +92,9 @@
 
             function drawTile(tile, x, y, dir) {
                 if (dir === 0 || dir) {
-                    ctx.drawImage(tile[dir], x * bw, y * bh, bw, bh);
+                    ctx.drawImage(tile[dir], x * bw - viewX, y * bh - viewY, bw, bh);
                 } else {
-                    ctx.drawImage(tile, x * bw, y * bh, bw, bh);
+                    ctx.drawImage(tile, x * bw - viewX, y * bh - viewY, bw, bh);
                 }
             }
 
@@ -101,7 +107,7 @@
                     // } else {
                     //     grid[y].push(new Tile(x, y, {t: 'empty'}))
                     // }
-                    grid[y].push(new Tile(x, y, {t: 'empty'}))
+                    grid[y].push(new Tile(x, y, {t: 'grass'}))
                 }
             }
 
@@ -146,6 +152,8 @@
                 grid.forEach(y=>{
                     y.forEach(x=>x.draw())
                 })
+
+                requestAnimationFrame(render);
             }
 
             function init() {
@@ -154,8 +162,8 @@
             }
 
             cvs.addEventListener('mousedown', e=>{
-                let x = Math.floor((e.clientX - cvs.getBoundingClientRect().x)/bw);
-                let y = Math.floor((e.clientY - cvs.getBoundingClientRect().y)/bh);
+                let x = Math.floor((e.clientX - cvs.getBoundingClientRect().x + viewX)/bw);
+                let y = Math.floor((e.clientY - cvs.getBoundingClientRect().y + viewY)/bh);
 
                 if (inGrid(x, y)) {
                     if (grid[y][x].t == 'grass') { 
@@ -163,8 +171,39 @@
                     } else {
                         grid[y][x].t = 'grass';
                     }
-                    render();
+                    // render();
                 }
+            })
+
+            let keyMap = {};
+
+            document.body.addEventListener('keydown', e=>{
+                keyMap[e.key] = true;
+            })
+
+            document.body.addEventListener('keyup', e=>{
+                keyMap[e.key] = false;
+            })
+
+            setInterval(()=>{
+                if (keyMap.d) {
+                    viewX += viewMoveSpeed;
+                }
+                if (keyMap.a) {
+                    viewX -= viewMoveSpeed;
+                }
+                if (keyMap.w) {
+                    viewY -= viewMoveSpeed;
+                }
+                if (keyMap.s) {
+                    viewY += viewMoveSpeed;
+                }
+
+                viewX = Math.max(0, viewX);
+                viewX = Math.min(viewX, gw * bw - scrW);
+
+                viewY = Math.max(0, viewY);
+                viewY = Math.min(viewY, gh * bh - scrH);
             })
         </script>
     </body>
